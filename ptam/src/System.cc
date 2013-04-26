@@ -90,9 +90,29 @@ void System::imageCallback(const sensor_msgs::ImageConstPtr & img)
 {
 //	static ros::Time t = img->header.stamp;
 
-
-  ROS_ASSERT(img->encoding == sensor_msgs::image_encodings::MONO8 && img->step == img->width);
-
+  // image-stub which will contain bw image
+  cv::Mat imgBW;
+  
+  ROS_ASSERT(img->step == img->width);
+  
+  if(img->encoding == sensor_msgs::image_encodings::RGB8)
+  {
+      // wrap around color data, and convert to bw image.
+      cv::Mat imgColTmp = cv::Mat(img->height, img->width,CV_8UC3, (uchar*)img->data.data());
+      cv::cvtColor(imgColTmp,imgBW,CV_RGB2GRAY);
+  }
+  else if(img->encoding == sensor_msgs::image_encodings::MONO8)
+  {
+      // just wrap around data... does not copy any image data.
+      imgBW = cv::Mat(img->height, img->width,CV_8U, (uchar*)img->data.data());
+  }
+  else
+  {
+    // throw error
+    ROS_ASSERT(img->encoding == sensor_msgs::image_encodings::RGB8 || img->encoding == sensor_msgs::image_encodings::MONO8);
+  }
+  
+  
   VarParams *varParams = ParamsAccess::varParams;
 
   if(first_frame_){
@@ -120,7 +140,7 @@ void System::imageCallback(const sensor_msgs::ImageConstPtr & img)
 
 //  -------------------
   // TODO: avoid copy, but calling TrackFrame, with the ros image, because there is another copy inside TrackFrame
-  CVD::BasicImage<CVD::byte> img_tmp((CVD::byte *)&img->data[0], CVD::ImageRef(img->width, img->height));
+  CVD::BasicImage<CVD::byte> img_tmp(imgBW.data, CVD::ImageRef(img->width, img->height));
   CVD::copy(img_tmp, img_bw_);
 
   bool tracker_draw = false;
