@@ -452,11 +452,11 @@ bool MapMaker::InitFromStereo(KeyFrame &kF,
 	}
 
 	//sanity check: if the point variance is too large assume init is crap --> very hacky, assumes flat init scene!!
-	if((pkFirst->dSceneDepthSigma+pkSecond->dSceneDepthSigma)/2.0>0.5)
-	{
-		ROS_WARN_STREAM("Initial map rejected because of too large point variance. Point sigma: " << ((pkFirst->dSceneDepthSigma+pkSecond->dSceneDepthSigma)/2.0));
-		return false;
-	}
+	//if((pkFirst->dSceneDepthSigma+pkSecond->dSceneDepthSigma)/2.0>0.5)
+	//{
+	//	ROS_WARN_STREAM("Initial map rejected because of too large point variance. Point sigma: " << ((pkFirst->dSceneDepthSigma+pkSecond->dSceneDepthSigma)/2.0));
+	//	return false;
+	//}
 
 //}
 
