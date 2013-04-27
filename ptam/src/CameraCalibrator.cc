@@ -16,6 +16,7 @@
 #include <ros/package.h>
 
 #include <cv_bridge/cv_bridge.h>
+#include <opencv/cv.h>
 
 using namespace CVD;
 using namespace std;
