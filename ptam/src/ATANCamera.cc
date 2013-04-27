@@ -17,6 +17,12 @@ ATANCamera::ATANCamera(string sName)
 	//mgvvCameraParams = mvDefaultParams;
 	FixParams* pPars = ParamsAccess::fixParams;
 	mgvvCameraParams = makeVector(pPars->Cam_fx, pPars->Cam_fy, pPars->Cam_cx, pPars->Cam_cy, pPars->Cam_s);
+	
+	
+	printf("Camera Parameters: fx: %f, fy: %f, cx: %f, cy: %f, dist: %f\n",
+	  pPars->Cam_fx, pPars->Cam_fy, pPars->Cam_cx, pPars->Cam_cy, pPars->Cam_s);
+	
+	
 	//GV2.Register(mgvvCameraParams, sName+".Parameters", mvDefaultParams, HIDDEN | FATAL_IF_NOT_DEFINED);
   //mvImageSize[0] = 640.0;
   //mvImageSize[1] = 480.0;
