@@ -94,8 +94,8 @@ void System::imageCallback(const sensor_msgs::ImageConstPtr & img)
   // image-stub which will contain bw image
   cv::Mat imgBW;
   
-  ROS_ASSERT(img->step == img->width);
-  
+//  ROS_ASSERT(img->step == img->width);
+
   if(img->encoding == sensor_msgs::image_encodings::RGB8)
   {
       // wrap around color data, and convert to bw image.

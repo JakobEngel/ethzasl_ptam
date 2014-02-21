@@ -59,7 +59,7 @@ int main(int argc, char** argv)
 void CameraCalibrator::imageCallback(const sensor_msgs::ImageConstPtr & img)
 {
 
-  ROS_ASSERT(img->step == img->width);
+//  ROS_ASSERT(img->step == img->width);
   
   cv::Mat imgBW;
   if(img->encoding == sensor_msgs::image_encodings::RGB8)

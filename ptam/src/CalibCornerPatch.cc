@@ -150,6 +150,13 @@ double CalibCornerPatch::Iterate(Image<byte> &im)
     {
       Vector<2> v2Pos_Template = vec(ir) - vec(mimTemplate.size() - ImageRef(1,1)) / 2.0;
       Vector<2> v2Pos_Image = mParams.v2Pos + v2Pos_Template;
+      if(!(v2Pos_Image[0] >= 0) || !(v2Pos_Image[1] >= 0))
+      {
+    	  std::cout << "cought NAN, prevented segfault!\n";
+    	  v2Pos_Image[0] = v2Pos_Image[1] = 100;
+    	  return 1e10;
+      }
+
       double dDiff = imInterp[v2Pos_Image] - (mParams.dGain * mimTemplate[ir] + mParams.dMean);
       dSum += fabs(dDiff);
       Vector<6> v6Jac;
