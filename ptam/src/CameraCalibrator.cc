@@ -106,6 +106,9 @@ void CameraCalibrator::init()
 {
   mGLWindow = new GLWindow2(mCurrentImage.size(), "Camera Calibrator");
 
+  mbDone = false;
+
+  GUI.RegisterCommand("CameraCalibrator.GrabImages", GUICommandCallBack, this);
   GUI.RegisterCommand("CameraCalibrator.GrabNextFrame", GUICommandCallBack, this);
   GUI.RegisterCommand("CameraCalibrator.Reset", GUICommandCallBack, this);
   GUI.RegisterCommand("CameraCalibrator.ShowNext", GUICommandCallBack, this);
@@ -118,6 +121,7 @@ void CameraCalibrator::init()
   GV3::Register(mgvnDisableDistortion, "CameraCalibrator.NoDistortion", 0, SILENT);
 
   GUI.ParseLine("GLWindow.AddMenu CalibMenu");
+  GUI.ParseLine("CalibMenu.AddMenuButton Live GrabImages CameraCalibrator.GrabImages");
   GUI.ParseLine("CalibMenu.AddMenuButton Live GrabFrame CameraCalibrator.GrabNextFrame");
   GUI.ParseLine("CalibMenu.AddMenuButton Live Reset CameraCalibrator.Reset");
   GUI.ParseLine("CalibMenu.AddMenuButton Live Optimize \"CameraCalibrator.Optimize=1\"");
@@ -241,6 +245,25 @@ void CameraCalibrator::GUICommandCallBack(void* ptr, string sCommand, string sPa
   ((CameraCalibrator*)ptr)->GUICommandHandler(sCommand, sParams);
 }
 
+
+#include <opencv/highgui.h>
+#include <opencv/cxcore.h>
+#include <opencv/cv.h>
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
+namespace fs = boost::filesystem;
+
+void conversionCVToNB(cv::Mat frame, Image<byte> &imBW, ATANCamera& mCamera){
+	cv::Mat clone = frame.clone();
+	cv::Mat_<cv::Vec3b>& frame_p = (cv::Mat_<cv::Vec3b>&)clone;
+	for (int i = 0; i < mCamera.GetImageSize()[1]; i++){
+		for (int j = 0; j < mCamera.GetImageSize()[0]; j++){	
+		imBW[i][j] = (frame_p(i,j)[0] + frame_p(i,j)[1] + frame_p(i,j)[2]) / 3;
+		}
+	}
+
+}
+
 void CameraCalibrator::GUICommandHandler(string sCommand, string sParams) // Called by the callback func..
 {
   if (sCommand == "CameraCalibrator.Reset")
@@ -278,6 +301,89 @@ void CameraCalibrator::GUICommandHandler(string sCommand, string sParams) // Cal
     }
     mbDone = true;
   }
+if(sCommand=="CameraCalibrator.GrabImages")
+    {
+      fs::path full_path( fs::initial_path<fs::path>() );
+      full_path = fs::system_complete( fs::path( "Images/" ) );
+
+      if ( !fs::exists( full_path ) )
+      {
+	std::cout << "\nNot found: " << full_path.c_str() << std::endl;
+	return;
+      }
+
+      if ( fs::is_directory( full_path ) )
+      {
+	std::cout << "\nIn directory: "
+		  << full_path.c_str() << "\n\n";
+	fs::directory_iterator end_iter;
+	for ( fs::directory_iterator dir_itr( full_path );
+	      dir_itr != end_iter;
+	      ++dir_itr )
+	{
+	  try
+	  {
+	    if ( fs::is_directory( dir_itr->status() ) )
+	    {
+// 	      ++dir_count;
+// 	      std::cout << dir_itr->path().filename() << " [directory]\n";
+	    }
+	    else if ( fs::is_regular_file( dir_itr->status() ) )
+	    {
+// 	      ++file_count;
+// 	      std::cout << dir_itr->path().filename() << "\n";
+	      
+	      cv::Mat image;
+	      image = cv::imread(dir_itr->path().c_str());
+	      printf("path: %s\n", dir_itr->path().c_str());
+// 	      cv::Mat grayImage;
+// 	      cvtColor(image, grayImage, CV_RGB2GRAY);
+// 	      printf("1\n");
+	      
+	      Image<byte> imBW(mCurrentImage.size());
+	      conversionCVToNB(image, imBW, mCamera);
+		  
+		  // TODO: display 3D points
+		  glDrawPixels(imBW);
+	      
+	      CalibImage c;
+	      if(c.MakeFromImage(imBW))
+	      {
+		printf("Using image %s\n", dir_itr->path().filename().c_str());
+		mvCalibImgs.push_back(c);
+		mvCalibImgs.back().GuessInitialPose(mCamera);
+		
+		// TODO: display 3D points
+		//mvCalibImgs.back().Draw3DGrid(mCamera, false);
+	    mGLWindow->HandlePendingEvents();
+	    mGLWindow->swap_buffers();
+		//sleep(3);
+	      }
+	      else
+	      {
+		printf("NOT using image %s\n", dir_itr->path().filename().c_str());
+	      }
+	    }
+	    else
+	    {
+// 	      ++other_count;
+// 	      std::cout << dir_itr->path().filename() << " [other]\n";
+	    }
+
+	  }
+	  catch ( const std::exception & ex )
+	  {
+// 	    ++err_count;
+	    std::cout << dir_itr->path().filename().c_str() << " " << ex.what() << std::endl;
+	  }
+	}
+// 	std::cout << "\n" << file_count << " files\n"
+// 		  << dir_count << " directories\n"
+// 		  << other_count << " others\n"
+// 		  << err_count << " errors\n";
+      }
+      
+    }
   if (sCommand == "exit" || sCommand == "quit")
   {
     mbDone = true;

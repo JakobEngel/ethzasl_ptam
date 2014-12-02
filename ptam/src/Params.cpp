@@ -30,7 +30,7 @@ void FixParams::readFixParams()
 //    ROS_BREAK();
   }
 
-  nh.param("ImageSizeX", ImageSizeX, 640);
+  nh.param("ImageSizeX", ImageSizeX, 752);
   nh.param("ImageSizeY", ImageSizeY, 480);
   nh.param("ARBuffer_width", ARBuffer_width, 1200);
   nh.param("ARBuffer_height", ARBuffer_height, 900);
@@ -39,11 +39,11 @@ void FixParams::readFixParams()
   nh.param("TrackerMEstimator", TrackerMEstimator, std::string("Tukey"));
   nh.param("MinTukeySigma", MinTukeySigma, 0.4);
   nh.param("CandidateMinSTScore", CandidateMinSTScore, 70);
-  //	nh.param("Cam_fx", Cam_fx,0.392);
-  //	nh.param("Cam_fy", Cam_fy,0.613);
-  //	nh.param("Cam_cx", Cam_cx,0.484);
-  //	nh.param("Cam_cy", Cam_cy,0.476);
-  //	nh.param("Cam_s", Cam_s,0.967);
+	nh.param("Cam_fx", Cam_fx,0.392);
+	nh.param("Cam_fy", Cam_fy,0.613);
+	nh.param("Cam_cx", Cam_cx,0.484);
+	nh.param("Cam_cy", Cam_cy,0.476);
+	nh.param("Cam_s", Cam_s,0.967);
   nh.param("Calibrator_BlurSigma", Calibrator_BlurSigma, 1.0);
   nh.param("Calibrator_MeanGate", Calibrator_MeanGate, 10.0);
   nh.param("Calibrator_MinCornersForGrabbedImage", Calibrator_MinCornersForGrabbedImage, 20);
@@ -57,6 +57,6 @@ void FixParams::readFixParams()
   nh.param("GLWindowMenu_mgvnMenuTextOffset", GLWindowMenu_mgvnMenuTextOffset, 20);
   nh.param("InitLevel", InitLevel, 1);
   nh.param("parent_frame", parent_frame, std::string("world"));
-  nh.param("gui", gui, false);
+  nh.param("gui", gui, true);
 }
 ;
